@@ -14,8 +14,38 @@ knitr::opts_chunk$set(echo = FALSE)
 # Learn more about publishing to GitHub Pages at:
 # https://rstudio.github.io/distill/publish_website.html#github-pages
 
-library(tidyverse)
 
+library(tidyverse)
+library(distill)
+library(rvest)
+
+x <- read_html("https://en.wikipedia.org/wiki/UEFA_Euro_2020_squads")
+
+```
+
+
+```{r}
+raw_data <- x %>% 
+html_elements("td:nth-child(4)") %>% 
+html_text2() %>% 
+as_tibble()
+
+write_csv(raw_data, "birthdates.csv")
+
+raw_data %>% 
+  arrange() %>% 
+  mutate(birth_month = substring(value, 7,8 )) %>% 
+  group_by(birth_month) %>% 
+  summarize(total = n()) %>% 
+  mutate(month = c("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")) %>% 
+  ggplot(mapping = aes(x=month, y = total, fill = month))+
+  geom_col()+
+  coord_flip()+
+  labs(
+    title = "Players born in each month of the year",
+    x = "Month",
+    y = "Amount of players",
+    fill = "")
 
 ```
 
